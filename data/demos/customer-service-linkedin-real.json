@@ -1,0 +1,163 @@
+{
+  "query": "remote customer service",
+  "scrapedAt": "2026-06-12T23:34:57.022Z",
+  "source": "linkedin",
+  "actor": "curious_coder/linkedin-jobs-scraper",
+  "totalResults": 15,
+  "jobs": [
+    {
+      "title": "Customer Service Manager",
+      "company": "Tres Health",
+      "location": "United States",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-manager-at-tres-health-4377266802",
+      "postedAt": "2026-02-26",
+      "jobType": "Full-time",
+      "seniorityLevel": "Mid-Senior level",
+      "source": "linkedin"
+    },
+    {
+      "title": "Customer Service Representative",
+      "company": "MediDrive, LLC",
+      "location": "United States",
+      "salary": "$16.00/hr - $19.00/hr",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-representative-at-medidrive-llc-4416322852",
+      "postedAt": "2026-05-20",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "CUSTOMER SERVICE SPECIALIST 1229",
+      "company": "City of Los Angeles",
+      "location": "Los Angeles, CA",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-specialist-1229-revised-01-23-26-b-at-city-of-los-angeles-4421109538",
+      "postedAt": "2026-05-11",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "Customer Service Representative",
+      "company": "Insight Global",
+      "location": "United States",
+      "salary": "$15.00/hr - $17.00/hr",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-representative-at-insight-global-4415678436",
+      "postedAt": "2026-05-18",
+      "jobType": "Full-time",
+      "seniorityLevel": "Entry level",
+      "source": "linkedin"
+    },
+    {
+      "title": "Customer Service Representative",
+      "company": "New York City Department of Consumer and Worker Protection",
+      "location": "New York City Metropolitan Area",
+      "salary": "$38,173/yr - $56,872/yr",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-representative-at-new-york-city-department-of-consumer-and-worker-protection-4402138754",
+      "postedAt": "2026-05-28",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "Member Service Representative - Contact Center",
+      "company": "United States Senate Federal Credit Union",
+      "location": "United States",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/member-service-representative-contact-center-at-united-states-senate-federal-credit-union-4427624096",
+      "postedAt": "2026-06-11",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "Claims Resolution Adjuster - Remote (PST/MST/CST)",
+      "company": "Allstate",
+      "location": "United States",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/claims-resolution-adjuster-remote-pst-mst-cst-at-allstate-4416568493",
+      "postedAt": "2026-06-12",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "Customer Service Representative",
+      "company": "Insight Global",
+      "location": "United States",
+      "salary": "$15.00/hr - $18.00/hr",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-representative-at-insight-global-4424461081",
+      "postedAt": "2026-06-04",
+      "jobType": "Full-time",
+      "seniorityLevel": "Entry level",
+      "source": "linkedin"
+    },
+    {
+      "title": "Customer Service Representative",
+      "company": "AccountMakers",
+      "location": "Los Angeles, CA",
+      "salary": "$50,000/yr - $70,000/yr",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-representative-at-accountmakers-4415078611",
+      "postedAt": "2026-06-03",
+      "jobType": "Full-time",
+      "seniorityLevel": "Entry level",
+      "source": "linkedin"
+    },
+    {
+      "title": "Digital Support Specialist",
+      "company": "Nymbus",
+      "location": "Jacksonville, FL",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/digital-support-specialist-at-nymbus-4426521673",
+      "postedAt": "2026-06-09",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "LA County - Contact Center MSR II - Remote",
+      "company": "Golden 1 Credit Union",
+      "location": "Los Angeles County, CA",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/la-county-contact-center-msr-ii-remote-at-golden-1-credit-union-4342324616",
+      "postedAt": "2026-05-28",
+      "jobType": "Internship",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "Remote Customer Service Representative",
+      "company": "Copart",
+      "location": "United States",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/remote-customer-service-representative-at-copart-4386944378",
+      "postedAt": "2026-06-11",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "Customer Service Phone Agent",
+      "company": "Paleovalley",
+      "location": "Washington, DC",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-phone-agent-at-paleovalley-4427070430",
+      "postedAt": "2026-06-10",
+      "jobType": "Full-time",
+      "seniorityLevel": "Not Applicable",
+      "source": "linkedin"
+    },
+    {
+      "title": "Customer Service Representative - Phone and Chat",
+      "company": "iPostal1",
+      "location": "Boston, MA",
+      "salary": "",
+      "url": "https://www.linkedin.com/jobs/view/customer-service-representative-phone-and-chat-boston-ma-at-ipostal1-4406238894",
+      "postedAt": "2026-04-28",
+      "jobType": "Full-time",
+      "seniorityLevel": "Associate",
+      "source": "linkedin"
+    }
+  ]
+}

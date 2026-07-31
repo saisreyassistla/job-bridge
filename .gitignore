@@ -1,0 +1,16 @@
+.env
+node_modules/
+.pnpm-store/
+rag/.venv/
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+rag/data/processed/
+rag/qdrant_storage/
+qdrant_storage/
+*.pkl
+.slack/
+.DS_Store
+rag/.cache/

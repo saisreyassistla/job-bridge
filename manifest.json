@@ -1,0 +1,68 @@
+{
+  "display_information": {
+    "name": "JobBridge",
+    "description": "Find jobs, understand companies, and prepare to apply - in plain language.",
+    "background_color": "#1f6feb"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "JobBridge",
+      "always_online": true
+    },
+    "assistant_view": {
+      "assistant_description": "I help you find jobs, learn about companies, and get ready to apply.",
+      "suggested_prompts": [
+        {
+          "title": "Find a job",
+          "message": "I'm looking for part-time retail jobs near Renton, WA"
+        },
+        {
+          "title": "Check a company",
+          "message": "What's it like to work at Target?"
+        },
+        {
+          "title": "Build a resume",
+          "message": "I don't have a resume, can you help me make one?"
+        }
+      ]
+    },
+    "slash_commands": [
+      {
+        "command": "/find-job",
+        "description": "Search for jobs",
+        "usage_hint": "[job title] in [location]",
+        "should_escape": false
+      }
+    ]
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "assistant:write",
+        "chat:write",
+        "commands",
+        "im:history",
+        "im:read",
+        "im:write",
+        "users:read",
+        "files:read"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "app_mention",
+        "assistant_thread_started",
+        "message.im"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false
+  }
+}
