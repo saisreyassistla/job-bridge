@@ -1,0 +1,348 @@
+{
+  "timestamp": "2026-07-30T17:41:54.480113",
+  "reports": {
+    "retrieval_report": {
+      "timestamp": "2026-07-30T17:40:37.214890",
+      "k": 5,
+      "results": {
+        "bm25": {
+          "precision": 0.2,
+          "recall": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "dense": {
+          "precision": 0.16,
+          "recall": 0.2667,
+          "hit_rate": 0.8,
+          "mrr": 0.2233,
+          "ndcg": 0.3635
+        },
+        "rrf": {
+          "precision": 0.2,
+          "recall": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5167,
+          "ndcg": 0.6385
+        },
+        "reranked": {
+          "precision": 0.2,
+          "recall": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.6167,
+          "ndcg": 0.7123
+        }
+      }
+    },
+    "chunking_report": {
+      "timestamp": "2026-07-30T17:39:48.916740",
+      "directory": "data/raw",
+      "config": {
+        "chunk_size": 512,
+        "chunk_overlap": 64,
+        "overlap_ratio": 0.125
+      },
+      "pipeline": {
+        "raw_docs": 30,
+        "after_cleaning": 30,
+        "noise_filtered": 0,
+        "noise_filter_rate": 0.0,
+        "total_chunks": 229
+      },
+      "chunk_size_distribution": {
+        "mean_chars": 512.0,
+        "median_chars": 538,
+        "min_chars": 82,
+        "max_chars": 577,
+        "stdev_chars": 83.3,
+        "mean_words": 83.9
+      },
+      "chunks_per_document": {
+        "mean": 229,
+        "median": 229,
+        "min": 229,
+        "max": 229,
+        "total_sources": 1
+      },
+      "latency_ms": {
+        "stage_1_load": 4034.49,
+        "stage_2_clean": 10.87,
+        "stage_3_chunk": 1.12,
+        "stage_4_enrich": 4.56,
+        "total_ingestion": 4051.05
+      },
+      "throughput": {
+        "chunks_per_second": 56.5
+      }
+    },
+    "ragas_report": {
+      "timestamp": "2026-07-30T17:41:54.362269",
+      "judge_model": "claude-haiku-4-5-20251001",
+      "n_questions": 8,
+      "summary": {
+        "faithfulness": 0.8938,
+        "answer_relevancy": 0.4625,
+        "context_precision": 1.0,
+        "context_recall": 0.3575,
+        "overall": 0.6784
+      },
+      "per_question": [
+        {
+          "question": "What are Amazon's leadership principles?",
+          "answer": "Based on the provided context, I can see that Amazon uses Leadership Principles as part of their interview process [Source 1], but the context does not actually list what those specific Leadership Principles are. \n\nThe document mentions that \"Hiring managers are responsible for the assignment of interview competencies, including 1\u20132 Leadership Principles for each interviewer\" [Source 1], but it does not provide the actual names or descriptions of the Leadership Principles themselves.\n\nTo answer your question about what Amazon's specific leadership principles are, I would need additional context or sources that explicitly list them.",
+          "contexts": [
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview"
+          ],
+          "ground_truth": "Amazon has 16 leadership principles including Customer Obsession, Ownership, Invent and Simplify, Are Right A Lot, Learn and Be Curious, Hire and Develop the Best, Insist on the Highest Standards, Think Big, Bias for Action, Frugality, Earn Trust, Dive Deep, Have Backbone Disagree and Commit, Deliver Results, Strive to be Earth's Best Employer, and Success and Scale Bring Broad Responsibility.",
+          "faithfulness": 0.75,
+          "answer_relevancy": 0.25,
+          "context_precision": 1.0,
+          "context_recall": 0.0,
+          "overall": 0.5
+        },
+        {
+          "question": "How should I use the Amazon Interview Questions Bank?",
+          "answer": "According to the Amazon Interview Questions Bank, you should use it in the following way [Source 1]:\n\n1. **Select your Leadership Principle or Functional Competency** - Choose the relevant principle or competency area you want to prepare for.\n\n2. **Prepare questions for your interview** - Use the selected questions to help you get ready for your interview.\n\nThe document also notes that the AIQB includes sections on Legal and Ethical Code as well as an Interview question bank organized by various leadership principles such as Are Right, a Lot; Bias for Action; Customer Obsession; Deliver Results; Dive Deep; Earn Trust; Frugality; Have Backbone, Disagree and Commit; Hire and Develop the Best; and Insist on Highest Standards [Source 1].",
+          "contexts": [
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards"
+          ],
+          "ground_truth": "Select a Leadership Principle or Functional Competency, assign it to an interviewer, use the provided questions to assess candidates during the interview process following the Making Great Hiring Decisions course methodology.",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.85,
+          "context_precision": 1.0,
+          "context_recall": 0.33,
+          "overall": 0.795
+        },
+        {
+          "question": "What is the STAR method for interviews?",
+          "answer": "Based on the provided context, the STAR method is mentioned as a tool used during interviews, but the context does not provide a detailed explanation of what STAR actually stands for or how it works.\n\nThe context only indicates that you should \"Use the STAR Worksheet to probe, challenge, and dive deep into their responses\" when conducting behavioral interview questions [Source 1]. However, it does not define the STAR method itself or explain its components.\n\nTo get a complete answer about what the STAR method is, you would need additional sources beyond what has been provided.",
+          "contexts": [
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code"
+          ],
+          "ground_truth": "STAR stands for Situation Task Action Result. It is a structured method for answering behavioral interview questions by describing the situation, the task you needed to accomplish, the action you took, and the result you achieved.",
+          "faithfulness": 0.75,
+          "answer_relevancy": 0.35,
+          "context_precision": 1.0,
+          "context_recall": 0.15,
+          "overall": 0.5625
+        },
+        {
+          "question": "What types of questions does Amazon ask in a software engineer interview?",
+          "answer": "Based on the provided context, I can see that Amazon uses an Interview Questions Bank (AIQB) organized around Leadership Principles and Functional Competencies [Source 1]. The document lists various leadership principles that appear to be used as themes for interview questions, including:\n\n- Are Right, a Lot\n- Bias for Action\n- Customer Obsession\n- Deliver Results\n- Dive Deep\n- Earn Trust\n- Frugality\n- Have Backbone, Disagree and Commit\n- Hire and Develop the Best\n- Insist on Highest Standards\n\n[Source 1]\n\nHowever, the provided context does not contain specific details about what types of questions are actually asked in a software engineer interview, such as technical questions, coding problems, system design questions, or behavioral question examples. To answer that question fully, I would need additional source material.",
+          "contexts": [
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards"
+          ],
+          "ground_truth": "Amazon asks coding questions on data structures and algorithms, system design questions, and behavioral questions based on their 16 leadership principles framed as Tell me about a time when.",
+          "faithfulness": 0.95,
+          "answer_relevancy": 0.45,
+          "context_precision": 1.0,
+          "context_recall": 0.33,
+          "overall": 0.6825
+        },
+        {
+          "question": "How do I prepare for a behavioral interview at Amazon?",
+          "answer": "Based on the provided context, here's how to prepare for a behavioral interview at Amazon:\n\n1. **Prepare questions from the AIQB**: You can take questions from the appropriate section of the AIQB (Amazon Interview Question Bank) or create your own behavioral interview questions. [Source 1]\n\n2. **Focus on 2-3 questions**: Concentrate on 2\u20133 questions so that you can get the full story for each candidate example. [Source 1]\n\n3. **Use the STAR Worksheet**: Use the STAR Worksheet to probe, challenge, and dive deep into responses to behavioral questions. [Source 1]\n\n**Note:** The context provided focuses on how to *conduct* a behavioral interview at Amazon rather than how to prepare *as a candidate* for one. The AIQB mentioned is described as an Amazon Confidential resource for internal use only. [Source 1]",
+          "contexts": [
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code",
+            "he\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview You can take questions from the appropriate section of the AIQB or create your own behavioral interview\nquestions for your interview. Focus on 2\u20133 questions so that you can get the full story for each candidate\nexample. Use the\u00a0\nSTAR Worksheet\n\u00a0to probe, challenge, and dive deep into their responses.\u00a0\u00a0\n\u26a0 Important: The AIQB is an Amazon Confidential resource. Do not share it outside of Amazon.\nLegal and Ethical Code"
+          ],
+          "ground_truth": "Use the STAR method to structure answers. Prepare stories from past experience that demonstrate each leadership principle. Hiring managers assign 1 to 2 leadership principles to each interviewer to assess.",
+          "faithfulness": 0.95,
+          "answer_relevancy": 0.15,
+          "context_precision": 1.0,
+          "context_recall": 0.65,
+          "overall": 0.6875
+        },
+        {
+          "question": "What is customer obsession at Amazon?",
+          "answer": "The provided context does not contain a definition or explanation of what \"Customer Obsession\" means at Amazon. While \"Customer Obsession\" is listed as one of Amazon's Leadership Principles in the Amazon Interview Questions Bank [Source 1], the actual definition or details about this principle are not included in the excerpt provided.\n\nTo answer your question accurately, I would need access to additional source material that specifically defines this leadership principle.",
+          "contexts": [
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards",
+            "Amazon Interview Questions Bank (AIQB) - Global\nLast Revised Date: 6/30/2026\nTable of Contents\nAmazon Interview Questions Bank (AIQB) - Global\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\n2.\u00a0\u00a0Prepare questions for your interview\nLegal and Ethical Code\nInterview question bank\nAre Right, a Lot\nBias for Action\nCustomer Obsession\nDeliver Results\nDive Deep\nEarn Trust\nFrugality\nHave Backbone, Disagree and Commit\nHire and Develop the Best\nInsist on Highest Standards"
+          ],
+          "ground_truth": "Customer Obsession is Amazon's first leadership principle. Leaders start with the customer and work backwards. They work vigorously to earn and keep customer trust. Although leaders pay attention to competitors they obsess over customers.",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.35,
+          "context_precision": 1.0,
+          "context_recall": 0.15,
+          "overall": 0.625
+        },
+        {
+          "question": "What is bias for action at Amazon?",
+          "answer": "Based on the provided context, bias for action at Amazon is a leadership principle that emphasizes the importance of speed in business decision-making. According to Amazon, \"Speed matters in business. Many decisions and actions are reversible and do not need extensive study. We value calculated risk taking.\" [Source 1]\n\nIn other words, Amazon encourages employees to make timely decisions and take action rather than getting bogged down in lengthy analysis, recognizing that many business decisions can be adjusted or reversed if needed. The principle centers on valuing calculated risk-taking as part of this approach.",
+          "contexts": [
+            "nings from this experience? Knowing what you know now, would you have done anything different?\n8. At Amazon, we find that diverse and inclusive teams bring a wide variety of perspectives to solve a\nproblem. Give me an example of a time when you sought diverse perspectives. Did those perspectives\nchallenge any of your assumptions?\nBias for Action\nBias for Action\nSpeed matters in business. Many decisions and actions are reversible and do not need extensive study. We\nvalue calculated risk taking.\nConcern\nMild concern\nMixed\nMild strength\nStrength",
+            "nings from this experience? Knowing what you know now, would you have done anything different?\n8. At Amazon, we find that diverse and inclusive teams bring a wide variety of perspectives to solve a\nproblem. Give me an example of a time when you sought diverse perspectives. Did those perspectives\nchallenge any of your assumptions?\nBias for Action\nBias for Action\nSpeed matters in business. Many decisions and actions are reversible and do not need extensive study. We\nvalue calculated risk taking.\nConcern\nMild concern\nMixed\nMild strength\nStrength",
+            "nings from this experience? Knowing what you know now, would you have done anything different?\n8. At Amazon, we find that diverse and inclusive teams bring a wide variety of perspectives to solve a\nproblem. Give me an example of a time when you sought diverse perspectives. Did those perspectives\nchallenge any of your assumptions?\nBias for Action\nBias for Action\nSpeed matters in business. Many decisions and actions are reversible and do not need extensive study. We\nvalue calculated risk taking.\nConcern\nMild concern\nMixed\nMild strength\nStrength",
+            "nings from this experience? Knowing what you know now, would you have done anything different?\n8. At Amazon, we find that diverse and inclusive teams bring a wide variety of perspectives to solve a\nproblem. Give me an example of a time when you sought diverse perspectives. Did those perspectives\nchallenge any of your assumptions?\nBias for Action\nBias for Action\nSpeed matters in business. Many decisions and actions are reversible and do not need extensive study. We\nvalue calculated risk taking.\nConcern\nMild concern\nMixed\nMild strength\nStrength",
+            "nings from this experience? Knowing what you know now, would you have done anything different?\n8. At Amazon, we find that diverse and inclusive teams bring a wide variety of perspectives to solve a\nproblem. Give me an example of a time when you sought diverse perspectives. Did those perspectives\nchallenge any of your assumptions?\nBias for Action\nBias for Action\nSpeed matters in business. Many decisions and actions are reversible and do not need extensive study. We\nvalue calculated risk taking.\nConcern\nMild concern\nMixed\nMild strength\nStrength"
+          ],
+          "ground_truth": "Bias for Action means speed matters in business. Many decisions and actions are reversible and do not need extensive study. Amazon values calculated risk taking and moving fast even with incomplete information.",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.95,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "overall": 0.9875
+        },
+        {
+          "question": "What functional competencies does the Amazon interview questions bank cover?",
+          "answer": "The provided context does not contain information about which specific functional competencies the Amazon Interview Questions Bank covers. While [Source 1] mentions that \"Hiring managers are responsible for the assignment of interview competencies, including 1\u20132 Leadership Principles for each interviewer\" and references \"Leadership Principle or Functional Competency\" as categories within the AIQB, it does not list or describe the actual functional competencies included in the bank.\n\nTo answer your question accurately, I would need additional context that specifically details the functional competency categories available in the Interview Questions Bank.",
+          "contexts": [
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview",
+            "l interview approach taught\u00a0in the\u00a0Making Great Hiring Decisions course, which all Amazonians should complete prior to involvement in the interview process.\u00a0\nHow to use the AIQB\n1.\u00a0\u00a0Select your Leadership Principle\u00a0or Functional Competency\u00a0\nHiring managers are responsible for\u00a0the assignment of interview competencies, including 1\u20132 Leadership\nPrinciples for each interviewer, themselves, and the Bar Raiser. Select your assigned\u00a0competency from the\nAIQB sections below.\n2.\u00a0\u00a0Prepare questions for your interview"
+          ],
+          "ground_truth": "The Amazon Interview Questions Bank covers functional competencies including strategic thinking communication inclusion data driven decision making and other leadership and management skills in addition to the 16 leadership principles.",
+          "faithfulness": 0.75,
+          "answer_relevancy": 0.35,
+          "context_precision": 1.0,
+          "context_recall": 0.25,
+          "overall": 0.5875
+        }
+      ]
+    },
+    "latency_report": {
+      "timestamp": "2026-07-30T17:40:15.602732",
+      "n_queries": 5,
+      "stages": {
+        "query_processing": {
+          "mean_ms": 2360.14,
+          "median_ms": 2078.9,
+          "p95_ms": 2773.1,
+          "max_ms": 3082.0,
+          "min_ms": 1913.6,
+          "all_ms": [
+            2773.1,
+            2078.9,
+            1953.1,
+            1913.6,
+            3082.0
+          ]
+        },
+        "bm25": {
+          "mean_ms": 26.38,
+          "median_ms": 17.8,
+          "p95_ms": 18.0,
+          "max_ms": 70.7,
+          "min_ms": 10.6,
+          "all_ms": [
+            70.7,
+            10.6,
+            18.0,
+            14.8,
+            17.8
+          ]
+        },
+        "dense": {
+          "mean_ms": 829.92,
+          "median_ms": 160.9,
+          "p95_ms": 246.4,
+          "max_ms": 3540.6,
+          "min_ms": 100.5,
+          "all_ms": [
+            3540.6,
+            246.4,
+            101.2,
+            160.9,
+            100.5
+          ]
+        },
+        "rrf": {
+          "mean_ms": 0.16,
+          "median_ms": 0.1,
+          "p95_ms": 0.1,
+          "max_ms": 0.5,
+          "min_ms": 0.0,
+          "all_ms": [
+            0.5,
+            0.1,
+            0.1,
+            0.1,
+            0.0
+          ]
+        },
+        "reranking": {
+          "mean_ms": 151.36,
+          "median_ms": 156.6,
+          "p95_ms": 163.3,
+          "max_ms": 180.5,
+          "min_ms": 100.0,
+          "all_ms": [
+            156.6,
+            163.3,
+            156.4,
+            180.5,
+            100.0
+          ]
+        },
+        "context_prompt": {
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "max_ms": 0.0,
+          "min_ms": 0.0,
+          "all_ms": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "generation": {
+          "mean_ms": 1863.0,
+          "median_ms": 1888.2,
+          "p95_ms": 2103.4,
+          "max_ms": 2466.1,
+          "min_ms": 1364.6,
+          "all_ms": [
+            1492.7,
+            1888.2,
+            2103.4,
+            1364.6,
+            2466.1
+          ]
+        },
+        "total": {
+          "mean_ms": 5264.38,
+          "median_ms": 4413.7,
+          "p95_ms": 5787.2,
+          "max_ms": 8107.3,
+          "min_ms": 3659.3,
+          "all_ms": [
+            8107.3,
+            4413.7,
+            4354.4,
+            3659.3,
+            5787.2
+          ]
+        }
+      }
+    }
+  }
+}

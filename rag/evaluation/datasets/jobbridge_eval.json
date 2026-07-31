@@ -1,0 +1,47 @@
+[
+  {
+    "question": "How do I use the Amazon Interview Questions Bank?",
+    "ground_truth": "Select your Leadership Principle or Functional Competency, then use the provided questions during the interview process following the Making Great Hiring Decisions course.",
+    "relevant_sources": [
+      "Interview_Questions_Bank_amz.pdf",
+      "./data/raw/Interview_Questions_Bank_amz.pdf",
+      "data/raw/Interview_Questions_Bank_amz.pdf"
+    ]
+  },
+  {
+    "question": "How many leadership principles are assigned to each interviewer at Amazon?",
+    "ground_truth": "Hiring managers assign 1 to 2 Leadership Principles to each interviewer to assess during candidate interviews.",
+    "relevant_sources": [
+      "Interview_Questions_Bank_amz.pdf",
+      "./data/raw/Interview_Questions_Bank_amz.pdf",
+      "data/raw/Interview_Questions_Bank_amz.pdf"
+    ]
+  },
+  {
+    "question": "What course should Amazonians complete before interviewing candidates?",
+    "ground_truth": "All Amazonians should complete the Making Great Hiring Decisions course prior to involvement in the interview process.",
+    "relevant_sources": [
+      "Interview_Questions_Bank_amz.pdf",
+      "./data/raw/Interview_Questions_Bank_amz.pdf",
+      "data/raw/Interview_Questions_Bank_amz.pdf"
+    ]
+  },
+  {
+    "question": "What is the AIQB document?",
+    "ground_truth": "AIQB stands for Amazon Interview Questions Bank. It is a global resource that provides interview questions mapped to Amazon Leadership Principles and Functional Competencies.",
+    "relevant_sources": [
+      "Interview_Questions_Bank_amz.pdf",
+      "./data/raw/Interview_Questions_Bank_amz.pdf",
+      "data/raw/Interview_Questions_Bank_amz.pdf"
+    ]
+  },
+  {
+    "question": "What are the steps to conduct an Amazon interview using the AIQB?",
+    "ground_truth": "Select a Leadership Principle or Functional Competency, assign it to an interviewer, use the AIQB questions to assess the candidate, and follow the Making Great Hiring Decisions course methodology.",
+    "relevant_sources": [
+      "Interview_Questions_Bank_amz.pdf",
+      "./data/raw/Interview_Questions_Bank_amz.pdf",
+      "data/raw/Interview_Questions_Bank_amz.pdf"
+    ]
+  }
+]

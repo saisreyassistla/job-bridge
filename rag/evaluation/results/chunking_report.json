@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-07-30T17:39:48.916740",
+  "directory": "data/raw",
+  "config": {
+    "chunk_size": 512,
+    "chunk_overlap": 64,
+    "overlap_ratio": 0.125
+  },
+  "pipeline": {
+    "raw_docs": 30,
+    "after_cleaning": 30,
+    "noise_filtered": 0,
+    "noise_filter_rate": 0.0,
+    "total_chunks": 229
+  },
+  "chunk_size_distribution": {
+    "mean_chars": 512.0,
+    "median_chars": 538,
+    "min_chars": 82,
+    "max_chars": 577,
+    "stdev_chars": 83.3,
+    "mean_words": 83.9
+  },
+  "chunks_per_document": {
+    "mean": 229,
+    "median": 229,
+    "min": 229,
+    "max": 229,
+    "total_sources": 1
+  },
+  "latency_ms": {
+    "stage_1_load": 4034.49,
+    "stage_2_clean": 10.87,
+    "stage_3_chunk": 1.12,
+    "stage_4_enrich": 4.56,
+    "total_ingestion": 4051.05
+  },
+  "throughput": {
+    "chunks_per_second": 56.5
+  }
+}
