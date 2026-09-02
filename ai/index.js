@@ -12,7 +12,8 @@ import { hasDocumentContext, saveUserSearchResults, getUserSearchResults,
   saveResume,
   getResume,
   setActiveFlow,
-  getActiveFlow
+  getActiveFlow,
+  setChannelId
 } from "../state/conversation-context.js";
 import { fetchSupplementalListings } from "../server/apify-client.js";
 import { formatJobResults, formatPlainText } from "../utils/formatting.js";
@@ -22,30 +23,35 @@ import { formatJobResults, formatPlainText } from "../utils/formatting.js";
  * If user is mid-resume or mid-interview-prep, their replies stay in
  * that flow unless they explicitly ask for something else.
  */
-function classifyIntent(message, context, threadId) {
+async function classifyIntent(message, context, threadId) {
   const lower = message.toLowerCase();
-  const activeFlow = getActiveFlow(threadId);
+  const activeFlow = await getActiveFlow(threadId);
 
   // Reset trigger — clears active flow
   if (/^(start over|reset|cancel|stop|nevermind|never mind|exit|quit)$/i.test(lower.trim())) {
-    setActiveFlow(threadId, null);
+    await setActiveFlow(threadId, null);
     return "reset";
   }
 
   // Company lookup always overrides active flows
   if (/work at|what.*(like|about).*work|good place to work|place to work|company.*review|culture|rating|salary at|pay at|is .*good|how is|as a company|as an employer|tell me about.*company/.test(lower)) {
-    setActiveFlow(threadId, null);
+    await setActiveFlow(threadId, null);
     return "company_lookup";
   }
 
   // If thread has an uploaded document, route to RAG unless it's
   // clearly a job search request
-  if (hasDocumentContext(threadId)) {
+  // Check both threadId and channelId (DMs use channel as context key)
+  if (await hasDocumentContext(threadId) || (context.channelId && await hasDocumentContext(context.channelId))) {
     const isExplicitJobSearch =
       /^(find|search|look for|get me|show me).*jobs?\b/i.test(lower) ||
       /^i('m| am) looking for.*jobs?\b/i.test(lower) ||
       /jobs? near|jobs? in|hiring near|remote jobs?/i.test(lower);
-    if (!isExplicitJobSearch) {
+    const isResumeRequest =
+      /don.?t have a resume|build.*resume|make.*resume/i.test(lower);
+    const isCompanyLookup =
+      /work at|good place to work|as a company|as an employer/i.test(lower);
+    if (!isExplicitJobSearch && !isResumeRequest && !isCompanyLookup) {
       return "doc_followup";
     }
   }
@@ -54,7 +60,7 @@ function classifyIntent(message, context, threadId) {
   if (/don'?t have a resume|build.*resume|make.*resume|help.*resume|resume.*help|create.*resume|need.*resume|write.*resume/.test(lower)) {
     return "resume_builder";
   }
-  if (/interview|prepare|mock interview|practice.*question/.test(lower)) {
+  if (/mock interview|prepare.*interview|interview prep|practice.*question|help me prepare|get ready for/i.test(lower)) {
     return "interview_prep";
   }
   if (/work at|what.*(like|about).*work|good place to work|place to work|company.*review|culture|rating|salary at|pay at|is .* good|how is .* as.*employer/.test(lower)) {
@@ -102,26 +108,30 @@ function classifyIntent(message, context, threadId) {
  * Main entry point - called by Slack listeners with the user's message
  * and a threadId used to track conversation context.
  */
-export async function handleMessage(threadId, message, userId = null) {
-  const context = getContext(threadId);
-  if (!context.lastResults?.length && userId) {
-    const userResults = getUserSearchResults(userId);
-    if (userResults.length) saveSearchResults(threadId, userResults);
+export async function handleMessage(threadId, message, userId = null, channelId = null) {
+  const context = await getContext(threadId);
+  if (channelId) {
+    context.channelId = channelId;
+    await setChannelId(threadId, channelId);
   }
-  const intent = classifyIntent(message, context, threadId);
+  if (!context.lastResults?.length && userId) {
+    const userResults = await getUserSearchResults(userId);
+    if (userResults.length) await saveSearchResults(threadId, userResults);
+  }
+  const intent = await classifyIntent(message, context, threadId);
 
   switch (intent) {
     case "reset":
-      setActiveFlow(threadId, null);
+      await setActiveFlow(threadId, null);
       return { text: "No problem! What would you like to do? I can help you find jobs, look up companies, build a resume, or prepare for an interview." };
 
     case "job_search":
-      setActiveFlow(threadId, null);
+      await setActiveFlow(threadId, null);
       return handleJobSearch(threadId, message, context, userId);
 
     case "job_details": {
-      setActiveFlow(threadId, null);
-      const jobRef = resolveJobReference(threadId, message);
+      await setActiveFlow(threadId, null);
+      const jobRef = await resolveJobReference(threadId, message);
       if (!jobRef) {
         return { text: "I don't have any previous job results to reference. Search for jobs first (e.g. \"find me retail jobs in Seattle\"), then say \"tell me more about #1\"." };
       }
@@ -130,22 +140,22 @@ export async function handleMessage(threadId, message, userId = null) {
     }
 
     case "company_lookup": {
-      setActiveFlow(threadId, null);
+      await setActiveFlow(threadId, null);
       const companyName = extractCompanyName(message);
       const result = await getCompanyData(companyName, context.lastJobTitle, context.history);
       return { text: result.text };
     }
 
     case "interview_prep":
-      setActiveFlow(threadId, "interview_prep");
+      await setActiveFlow(threadId, "interview_prep");
       return handleInterviewPrep(threadId, message, context);
 
     case "resume_builder":
-      setActiveFlow(threadId, "resume_builder");
+      await setActiveFlow(threadId, "resume_builder");
       return handleResumeBuilder(threadId, message, context);
 
     case "rag_query":
-      setActiveFlow(threadId, null);
+      await setActiveFlow(threadId, null);
       return handleRAGQuery(message);
 
     default:
@@ -165,8 +175,8 @@ async function handleJobSearch(threadId, message, context, userId = null) {
     };
   }
 
-  saveSearchResults(threadId, jobs);
-  if (userId) saveUserSearchResults(userId, jobs);
+  await saveSearchResults(threadId, jobs);
+  if (userId) await saveUserSearchResults(userId, jobs);
 
 
   const followUp = "\n\n💡 *What's next?*\n• Say \"tell me more about #2\" to get details on a job\n• Say \"help me with my resume\" to create a resume tailored to these jobs\n• Say \"help me prepare for an interview\" after picking a job";
@@ -210,7 +220,7 @@ ${prompt}`;
     responseText.includes("Skills");
   
   if (hasResumeStructure) {
-    saveResume(threadId, responseText);
+    await saveResume(threadId, responseText);
   }
 
   return { text: responseText };
@@ -222,10 +232,10 @@ ${prompt}`;
  */
 async function handleInterviewPrep(threadId, message, context) {
   const job = context.lastViewedJob;
-  const resume = getResume(threadId);
+  const resume = await getResume(threadId);
 
   if (!job && !context.lastResults?.length) {
-    setActiveFlow(threadId, null);
+    await setActiveFlow(threadId, null);
     return {
       text: "Let's find a job first so I can help you prepare for that specific interview! Tell me what kind of job you're looking for and where."
     };

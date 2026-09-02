@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 import re
-import uuid
 from datetime import datetime, timezone
-from .chunker import Chunk
+from .chunker import Chunk, chunk_id
 
 
 def _detect_section(text: str) -> str:
@@ -29,7 +28,7 @@ def enrich(chunks: list[Chunk]) -> list[Chunk]:
     now = datetime.now(timezone.utc).isoformat()
     for chunk in chunks:
         chunk.metadata.update({
-            "id": str(uuid.uuid4()),
+            "id": chunk_id(chunk),
             "section": _detect_section(chunk.text),
             "word_count": _word_count(chunk.text),
             "char_count": len(chunk.text),

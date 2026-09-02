@@ -5,6 +5,7 @@
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
 const API_SERVER_URL = process.env.API_SERVER_URL || "http://localhost:3001";
+const SERVICE_API_KEY = process.env.SERVICE_API_KEY;
 const POLL_INTERVAL_MS = 4000;
 const POLL_TIMEOUT_MS = 60000;
 
@@ -22,7 +23,10 @@ export async function fetchSupplementalListings(message) {
   try {
     const startRes = await fetch(`${API_SERVER_URL}/api/jobs/search`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-service-key": SERVICE_API_KEY || "",
+      },
       body: JSON.stringify({ search, location }),
     });
 
@@ -37,7 +41,9 @@ export async function fetchSupplementalListings(message) {
     // Poll for results
     const deadline = Date.now() + POLL_TIMEOUT_MS;
     while (Date.now() < deadline) {
-      const resultsRes = await fetch(`${API_SERVER_URL}/api/jobs/results/${jobId}`);
+      const resultsRes = await fetch(`${API_SERVER_URL}/api/jobs/results/${jobId}`, {
+        headers: { "x-service-key": SERVICE_API_KEY || "" },
+      });
 
       if (resultsRes.ok) {
         const data = await resultsRes.json();

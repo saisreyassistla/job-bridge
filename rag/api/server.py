@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 import os
+import asyncio
+import logging
+import inspect
 from pathlib import Path
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Response, Header, Depends
 from pydantic import BaseModel
-from typing import Optional
-import shutil, tempfile
+import tempfile
 from typing import Optional
 
 from ingestion.loader import load_file
@@ -22,18 +24,40 @@ from graph.pipeline import build_pipeline
 bm25_index: BM25Index | None = None
 vector_index: VectorIndex | None = None
 pipeline = None
+BM25_PATH = "data/processed/bm25_index.pkl"
+logger = logging.getLogger(__name__)
+MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(25 * 1024 * 1024)))
+MAX_QUESTION_LENGTH = int(os.getenv("MAX_QUESTION_LENGTH", "2000"))
+SERVICE_API_KEY = os.getenv("SERVICE_API_KEY")
+INGEST_LOCK = asyncio.Lock()
+
+
+def upsert_vectors(vector_index: VectorIndex, chunks) -> None:
+    if "replace_sources" in inspect.signature(vector_index.upsert).parameters:
+        vector_index.upsert(chunks, replace_sources=True)
+    else:
+        logger.warning("Vector index lacks source replacement; using idempotent upsert")
+        vector_index.upsert(chunks)
+
+
+def require_service_key(service_key: Optional[str] = Header(default=None, alias="x-service-key")):
+    if not SERVICE_API_KEY:
+        raise HTTPException(status_code=503, detail="Service authentication is not configured")
+    if service_key != SERVICE_API_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global bm25_index, vector_index, pipeline
+    app.state.ready = False
     bm25_index = BM25Index()
-    bm25_path = "data/processed/bm25_index.pkl"
-    if Path(bm25_path).exists():
-        bm25_index.load(bm25_path)
-        print(f"Loaded BM25 index from {bm25_path}")
+    if Path(BM25_PATH).exists():
+        bm25_index.load(BM25_PATH)
+        print(f"Loaded BM25 index from {BM25_PATH}")
     vector_index = VectorIndex()
     pipeline = build_pipeline(bm25_index, vector_index)
+    app.state.ready = True
     print("RAG pipeline ready.")
     yield
 
@@ -49,35 +73,59 @@ class IngestResponse(BaseModel):
 
 
 @app.post("/ingest", response_model=IngestResponse)
-async def ingest(file: UploadFile = File(...)):
+async def ingest(file: UploadFile = File(...), _: None = Depends(require_service_key)):
     """Upload a document, run the full ingestion pipeline, and index it."""
-    suffix = Path(file.filename).suffix.lower()
+    global bm25_index, pipeline
+    filename = Path(file.filename or "upload").name
+    suffix = Path(filename).suffix.lower()
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        shutil.copyfileobj(file.file, tmp)
+        total_bytes = 0
+        too_large = False
+        while block := file.file.read(1024 * 1024):
+            total_bytes += len(block)
+            if total_bytes > MAX_UPLOAD_BYTES:
+                too_large = True
+                break
+            tmp.write(block)
         tmp_path = tmp.name
+    if too_large:
+        os.unlink(tmp_path)
+        raise HTTPException(status_code=413, detail="Uploaded file is too large")
 
     try:
-        raw_docs = load_file(tmp_path)
-        cleaned = clean_documents(raw_docs)
-        chunks = chunk_documents(cleaned)
-        enriched = enrich(chunks)
+        async with INGEST_LOCK:
+            raw_docs = load_file(tmp_path)
+            for document in raw_docs:
+                document.source = filename
+            cleaned = clean_documents(raw_docs)
+            chunks = chunk_documents(cleaned)
+            enriched = enrich(chunks)
 
-        bm25_index.add(enriched)
-        bm25_index.save()
-        vector_index.upsert(enriched)
+            replacement_bm25 = bm25_index.replace_sources(enriched)
+            pending_bm25_path = f"{BM25_PATH}.pending"
+            replacement_bm25.save(pending_bm25_path)
+            try:
+                upsert_vectors(vector_index, enriched)
+                os.replace(pending_bm25_path, BM25_PATH)
+            except Exception:
+                if os.path.exists(pending_bm25_path):
+                    os.unlink(pending_bm25_path)
+                raise
 
-        # Rebuild pipeline with updated indexes
-        global pipeline
-        pipeline = build_pipeline(bm25_index, vector_index)
+            # Publish the new in-memory index only after persistence succeeds.
+            bm25_index = replacement_bm25
+            pipeline = build_pipeline(bm25_index, vector_index)
 
-        return IngestResponse(
-            chunks_added=len(enriched),
-            message=f"Ingested {file.filename}: {len(enriched)} chunks indexed."
-        )
+            return IngestResponse(
+                chunks_added=len(enriched),
+                message=f"Ingested {filename}: {len(enriched)} chunks indexed."
+            )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Document ingestion failed for %s", filename)
+        raise HTTPException(status_code=500, detail="Document ingestion failed") from e
     finally:
-        os.unlink(tmp_path)
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 
 # ── /query ───────────────────────────────────────────────────────────────────
@@ -100,12 +148,15 @@ class QueryResponse(BaseModel):
 
 
 @app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest):
+async def query(request: QueryRequest, _: None = Depends(require_service_key)):
     """Run the full RAG pipeline and return a grounded answer with citations."""
+    question = request.question.strip()
+    if not question or len(question) > MAX_QUESTION_LENGTH:
+        raise HTTPException(status_code=400, detail="Question must be between 1 and 2000 characters")
     if not bm25_index or not bm25_index.chunks:
         raise HTTPException(status_code=400, detail="No documents ingested yet.")
 
-    result = pipeline.invoke({"question": request.question})
+    result = pipeline.invoke({"question": question})
     return QueryResponse(
         answer=result["answer"],
         citations=[Citation(**c) for c in result.get("citations", [])]
@@ -113,22 +164,29 @@ async def query(request: QueryRequest):
 
 
 @app.get("/health")
-def health():
+def health(response: Response):
+    ready = bool(getattr(app.state, "ready", False))
+    if not ready:
+        response.status_code = 503
     return {
-        "status": "ok",
+        "status": "ok" if ready else "starting",
+        "ready": ready,
         "indexed_chunks": len(bm25_index.chunks) if bm25_index else 0
     }
 
 
 @app.post("/report")
-async def report(request: QueryRequest):
+async def report(request: QueryRequest, _: None = Depends(require_service_key)):
     """Run full pipeline and return per-stage chunk report with latency."""
+    question = request.question.strip()
+    if not question or len(question) > MAX_QUESTION_LENGTH:
+        raise HTTPException(status_code=400, detail="Question must be between 1 and 2000 characters")
     if not bm25_index or not bm25_index.chunks:
         raise HTTPException(status_code=400, detail="No documents ingested yet.")
 
     import time
     t_start     = time.perf_counter()
-    result      = pipeline.invoke({"question": request.question})
+    result      = pipeline.invoke({"question": question})
     t_total     = (time.perf_counter() - t_start) * 1000
     report_data = result.get("report", {})
 

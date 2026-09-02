@@ -9,6 +9,7 @@
  */
 
 const API_SERVER_URL = process.env.API_SERVER_URL || "http://localhost:3001";
+const SERVICE_API_KEY = process.env.SERVICE_API_KEY;
 
 /**
  * Query the Hybrid RAG pipeline with a natural-language question.
@@ -21,7 +22,10 @@ export async function queryRAG(question) {
   try {
     const res = await fetch(`${API_SERVER_URL}/api/rag/query`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-service-key": SERVICE_API_KEY || "",
+      },
       body: JSON.stringify({ question }),
     });
 

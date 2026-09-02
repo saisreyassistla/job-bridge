@@ -18,8 +18,13 @@ from pathlib import Path
 from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from dotenv import load_dotenv
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv():
+        return False
+load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=True)
+SERVICE_API_KEY = os.getenv("SERVICE_API_KEY", "")
 
 # ── Default labeled retrieval dataset ────────────────────────────────────────
 # relevant_sources = source filenames that SHOULD appear in top-K results.
@@ -52,8 +57,12 @@ DEFAULT_RETRIEVAL_DATASET = [
 # ── Metric computations ───────────────────────────────────────────────────────
 
 def is_relevant(chunk: dict, relevant_sources: list[str]) -> bool:
-    source = (chunk.get("source") or "").lower()
-    return any(rs.lower() in source for rs in relevant_sources)
+    source = Path(chunk.get("source") or "").name.lower()
+    return any(Path(rs).name.lower() == source for rs in relevant_sources)
+
+
+def relevant_source_keys(relevant_sources: list[str]) -> set[str]:
+    return {Path(source).name.lower() for source in relevant_sources}
 
 
 def precision_at_k(chunks: list[dict], relevant_sources: list[str], k: int) -> float:
@@ -62,8 +71,13 @@ def precision_at_k(chunks: list[dict], relevant_sources: list[str], k: int) -> f
 
 
 def recall_at_k(chunks: list[dict], relevant_sources: list[str], k: int) -> float:
-    hits = sum(1 for c in chunks[:k] if is_relevant(c, relevant_sources))
-    return hits / len(relevant_sources) if relevant_sources else 0.0
+    expected = relevant_source_keys(relevant_sources)
+    found = {
+        Path(c.get("source") or "").name.lower()
+        for c in chunks[:k]
+        if is_relevant(c, relevant_sources)
+    }
+    return len(found & expected) / len(expected) if expected else 0.0
 
 
 def hit_rate_at_k(chunks: list[dict], relevant_sources: list[str], k: int) -> float:
@@ -93,8 +107,12 @@ def retrieve_all_stages(question: str, k: int) -> dict:
     import requests
     RAG_URL = os.getenv("RAG_SERVER_URL", "http://localhost:8000")
 
-    r = requests.post(f"{RAG_URL}/report",
-                      json={"question": question}, timeout=90)
+    r = requests.post(
+        f"{RAG_URL}/report",
+        headers={"x-service-key": SERVICE_API_KEY},
+        json={"question": question},
+        timeout=90,
+    )
     r.raise_for_status()
     data   = r.json()
     stages = data.get("stages", {})

@@ -1,203 +1,152 @@
-/**
- * In-memory conversation context, keyed by Slack thread ID. Tracks the
- * last set of search results so users can refer to "the second one",
- * the last company/job title discussed, and recent message history for
- * passing to Claude as conversational context.
- *
- * For a production deployment this should be backed by a real store
- * (Redis, DynamoDB, etc.) since in-memory state won't survive restarts
- * or work across multiple server instances.
- */
+import { createClient } from "redis";
 
-const contexts = new Map();
-
+const REDIS_URL = process.env.REDIS_URL;
+const STATE_PREFIX = process.env.STATE_PREFIX || "jobbridge";
 const MAX_HISTORY = 10;
+const memoryContexts = new Map();
+const memoryUserContexts = new Map();
+let redisPromise;
 
 function defaultContext() {
   return {
-    history: [],
-    lastResults: [],
-    lastViewedJob: null,
-    lastJobTitle: null,
-    userResume: null,
-    activeFlow: null  // "resume_builder" | "interview_prep" | null
+    history: [], lastResults: [], lastViewedJob: null, lastJobTitle: null,
+    userResume: null, activeFlow: null, documents: []
   };
 }
 
-/**
- * @param {string} threadId
- * @returns {object} context object (created if it doesn't exist)
- */
-export function getContext(threadId) {
-  if (!contexts.has(threadId)) {
-    contexts.set(threadId, defaultContext());
+async function redis() {
+  if (!REDIS_URL) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("REDIS_URL is required in production");
+    }
+    return null;
   }
-  return contexts.get(threadId);
+  if (!redisPromise) {
+    const client = createClient({ url: REDIS_URL });
+    client.on("error", (error) => console.error("Redis state error:", error.message));
+    redisPromise = client.connect().then(() => client);
+  }
+  return redisPromise;
 }
 
-/**
- * Appends a turn to the conversation history, trimming to MAX_HISTORY.
- */
-export function appendHistory(threadId, role, content) {
-  const context = getContext(threadId);
-  context.history.push({ role, content });
-  if (context.history.length > MAX_HISTORY) {
-    context.history = context.history.slice(-MAX_HISTORY);
+const contextKey = (threadId) => `${STATE_PREFIX}:context:${threadId}`;
+const userKey = (userId) => `${STATE_PREFIX}:user:${userId}`;
+
+export async function getContext(threadId) {
+  const client = await redis();
+  if (client) {
+    const stored = await client.get(contextKey(threadId));
+    return stored ? JSON.parse(stored) : defaultContext();
   }
+  if (!memoryContexts.has(threadId)) memoryContexts.set(threadId, defaultContext());
+  return memoryContexts.get(threadId);
 }
 
-/**
- * Stores the most recent search results so follow-up references
- * ("the second one") can be resolved.
- *
- * @param {string} threadId
- * @param {Array<{title: string, applyUrl: string, jobId?: string}>} jobs
- */
-export function saveSearchResults(threadId, jobs) {
-  const context = getContext(threadId);
+async function saveContext(threadId, context) {
+  const client = await redis();
+  if (client) await client.set(contextKey(threadId), JSON.stringify(context), { EX: 86400 });
+  else memoryContexts.set(threadId, context);
+}
+
+export async function appendHistory(threadId, role, content) {
+  const context = await getContext(threadId);
+  context.history = [...context.history, { role, content }].slice(-MAX_HISTORY);
+  await saveContext(threadId, context);
+}
+
+export async function saveSearchResults(threadId, jobs) {
+  const context = await getContext(threadId);
   context.lastResults = jobs;
-  if (jobs.length > 0 && jobs[0].title) {
-    context.lastJobTitle = jobs[0].title;
-  }
+  if (jobs[0]?.title) context.lastJobTitle = jobs[0].title;
+  await saveContext(threadId, context);
 }
 
-/**
- * Resolves a natural-language reference like "the second one" or "#2"
- * to a job_id from the last search results.
- *
- * @param {string} threadId
- * @param {string} message
- * @returns {string|null} job_id, or null if it can't be resolved
- */
-export function resolveJobReference(threadId, message) {
-  const context = getContext(threadId);
+export async function resolveJobReference(threadId, message) {
+  const context = await getContext(threadId);
   if (!context.lastResults?.length) return null;
-
-  // Order matters: more specific ordinal words are checked before plain
-  // number words, since e.g. "the second one" contains "one" as a
-  // substring and we want "second" to win.
   const ordinalMap = {
     first: 0, second: 1, third: 2, fourth: 3, fifth: 4,
     "1st": 0, "2nd": 1, "3rd": 2, "4th": 3, "5th": 4,
     "#1": 0, "#2": 1, "#3": 2, "#4": 3, "#5": 4,
     one: 0, two: 1, three: 2, four: 3, five: 4
   };
-
   const lower = message.toLowerCase();
-
-  for (const [key, index] of Object.entries(ordinalMap)) {
-    if (lower.includes(key) && context.lastResults[index]) {
-      const job = context.lastResults[index];
-      context.lastViewedJob = job;
-      return job.jobId || job.applyUrl;
-    }
+  let index = Object.entries(ordinalMap).find(([key]) => lower.includes(key))?.[1];
+  if (index === undefined) {
+    const match = lower.match(/\b(\d)\b/);
+    index = match ? Number(match[1]) - 1 : undefined;
   }
-
-  // Fallback: a bare number, e.g. "tell me about 3"
-  const numberMatch = lower.match(/\b(\d)\b/);
-  if (numberMatch) {
-    const index = parseInt(numberMatch[1], 10) - 1;
-    if (context.lastResults[index]) {
-      const job = context.lastResults[index];
-      context.lastViewedJob = job;
-      return job.jobId || job.applyUrl;
-    }
-  }
-
-  return null;
+  const job = index === undefined ? null : context.lastResults[index];
+  if (!job) return null;
+  context.lastViewedJob = job;
+  await saveContext(threadId, context);
+  return job.jobId || job.applyUrl;
 }
 
-/**
- * Clears context for a thread (e.g. on a "start over" request).
- */
-export function clearContext(threadId) {
-  contexts.delete(threadId);
+export async function clearContext(threadId) {
+  const client = await redis();
+  if (client) await client.del(contextKey(threadId));
+  else memoryContexts.delete(threadId);
 }
 
-/**
- * Saves the user's resume text so interview prep can reference it.
- */
-export function saveResume(threadId, resumeText) {
-  const context = getContext(threadId);
+export async function saveResume(threadId, resumeText) {
+  const context = await getContext(threadId);
   context.userResume = resumeText;
+  await saveContext(threadId, context);
 }
 
-/**
- * Gets the user's saved resume (if any).
- */
-export function getResume(threadId) {
-  const context = getContext(threadId);
-  return context.userResume;
+export async function getResume(threadId) {
+  return (await getContext(threadId)).userResume;
 }
 
-/**
- * Sets the active conversational flow.
- */
-export function setActiveFlow(threadId, flow) {
-  const context = getContext(threadId);
+export async function setActiveFlow(threadId, flow) {
+  const context = await getContext(threadId);
   context.activeFlow = flow;
+  await saveContext(threadId, context);
 }
 
-/**
- * Gets the active conversational flow.
- */
-export function getActiveFlow(threadId) {
-  const context = getContext(threadId);
-  return context.activeFlow;
+export async function getActiveFlow(threadId) {
+  return (await getContext(threadId)).activeFlow;
+}
+
+export async function setChannelId(threadId, channelId) {
+  const context = await getContext(threadId);
+  context.channelId = channelId;
+  await saveContext(threadId, context);
+}
+
+export async function hasDocumentContext(threadId) {
+  return Boolean((await getContext(threadId)).documents?.length);
+}
+
+export async function saveDocumentChunks(threadId, docMeta) {
+  const context = await getContext(threadId);
+  context.documents = [...(context.documents || []), docMeta];
+  await saveContext(threadId, context);
+}
+
+export async function getDocuments(threadId) {
+  return (await getContext(threadId)).documents || [];
+}
+
+export async function saveUserSearchResults(userId, jobs) {
+  const value = { lastResults: jobs, savedAt: Date.now() };
+  const client = await redis();
+  if (client) await client.set(userKey(userId), JSON.stringify(value), { EX: 1800 });
+  else memoryUserContexts.set(userId, value);
+}
+
+export async function getUserSearchResults(userId) {
+  const client = await redis();
+  const stored = client ? await client.get(userKey(userId)) : memoryUserContexts.get(userId);
+  if (!stored) return [];
+  const context = typeof stored === "string" ? JSON.parse(stored) : stored;
+  return Date.now() - context.savedAt <= 30 * 60 * 1000 ? context.lastResults || [] : [];
 }
 
 export default {
-  getContext,
-  appendHistory,
-  saveSearchResults,
-  resolveJobReference,
-  clearContext,
-  saveResume,
-  getResume,
-  setActiveFlow,
-  getActiveFlow
+  getContext, appendHistory, saveSearchResults, resolveJobReference, clearContext,
+  saveResume, getResume, setActiveFlow, getActiveFlow, hasDocumentContext,
+  setChannelId, saveDocumentChunks, getDocuments, saveUserSearchResults,
+  getUserSearchResults
 };
-
-/**
- * Returns true if this thread has at least one ingested document.
- */
-export function hasDocumentContext(threadId) {
-  const context = getContext(threadId);
-  return !!(context.documents?.length);
-}
-
-/**
- * Saves metadata about an ingested document for this thread.
- */
-export function saveDocumentChunks(threadId, docMeta) {
-  const context = getContext(threadId);
-  context.documents = context.documents || [];
-  context.documents.push(docMeta);
-}
-
-/**
- * Returns list of ingested document metadata for this thread.
- */
-export function getDocuments(threadId) {
-  return getContext(threadId).documents || [];
-}
-
-// ── User-level context (persists across threads) ──────────────────────────────
-// Keyed by userId so "tell me more about #3" works even from a new message
-
-const userContexts = new Map();
-
-export function saveUserSearchResults(userId, jobs) {
-  userContexts.set(userId, { lastResults: jobs, savedAt: Date.now() });
-}
-
-export function getUserSearchResults(userId) {
-  const ctx = userContexts.get(userId);
-  if (!ctx) return [];
-  // Expire after 30 minutes
-  if (Date.now() - ctx.savedAt > 30 * 60 * 1000) {
-    userContexts.delete(userId);
-    return [];
-  }
-  return ctx.lastResults || [];
-}

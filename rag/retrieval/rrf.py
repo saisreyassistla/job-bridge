@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 import os
-from ingestion.chunker import Chunk
+from ingestion.chunker import Chunk, chunk_id
 
 RRF_TOP_K = int(os.getenv("RRF_TOP_K", "20"))
 K_CONSTANT = 60  # standard RRF constant; higher = less top-rank bias
@@ -26,9 +26,7 @@ def reciprocal_rank_fusion(
     chunk_map: dict[str, Chunk] = {}
 
     def _fingerprint(chunk: Chunk) -> str:
-        # Use source+chunk_index as stable key; fall back to first 120 chars
-        key = f"{chunk.source}::{chunk.chunk_index}"
-        return key if chunk.source else chunk.text[:120]
+        return chunk.metadata.get("id") or chunk_id(chunk)
 
     for rank, (chunk, _) in enumerate(bm25_results, start=1):
         fp = _fingerprint(chunk)

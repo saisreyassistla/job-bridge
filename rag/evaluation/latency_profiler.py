@@ -21,9 +21,10 @@ from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=True)
 
 RAG_URL = os.getenv("RAG_SERVER_URL", "http://localhost:8000")
+SERVICE_API_KEY = os.getenv("SERVICE_API_KEY", "")
 
 TEST_QUERIES = [
     "What are Amazon's leadership principles?",
@@ -54,6 +55,7 @@ def run_http_pipeline(question: str) -> dict:
     """Call /report endpoint and extract per-stage latency."""
     t0 = time.perf_counter() * 1000
     r  = requests.post(f"{RAG_URL}/report",
+                       headers={"x-service-key": SERVICE_API_KEY},
                        json={"question": question}, timeout=120)
     r.raise_for_status()
     total_ms = (time.perf_counter() * 1000) - t0

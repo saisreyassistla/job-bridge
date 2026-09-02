@@ -43,6 +43,7 @@ export default function registerFileSharedListener(app) {
         console.log("✅ Downloaded bytes:", fileBuffer.length);
 
         const RAG_URL = process.env.RAG_SERVER_URL || "http://localhost:8000";
+        const SERVICE_API_KEY = process.env.SERVICE_API_KEY;
         console.log("📤 Sending to RAG:", `${RAG_URL}/ingest`);
 
         const formData = new FormData();
@@ -51,6 +52,7 @@ export default function registerFileSharedListener(app) {
 
         const ingestRes = await fetch(`${RAG_URL}/ingest`, {
           method: "POST",
+          headers: { "x-service-key": SERVICE_API_KEY || "" },
           body: formData,
         });
         console.log("📤 Ingest status:", ingestRes.status);
@@ -60,11 +62,23 @@ export default function registerFileSharedListener(app) {
         }
 
         const { chunks_added } = await ingestRes.json();
+
+        // Save document context so follow-up questions route to RAG
+        await saveDocumentChunks(contextKey, {
+          fileName:    file.name,
+          fileType,
+          chunksAdded: chunks_added,
+          ingestedAt:  new Date().toISOString(),
+        });
+        console.log("✅ Document context saved for key:", contextKey, "channelId:", channelId, "threadId:", threadId, "file:", file.name);
         console.log("✅ Chunks added:", chunks_added);
 
         const summaryRes = await fetch(`${RAG_URL}/query`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-service-key": SERVICE_API_KEY || "",
+          },
           body: JSON.stringify({
             question: `Summarize the key points of the document "${file.name}" in plain language using bullet points.`,
           }),
@@ -81,7 +95,7 @@ export default function registerFileSharedListener(app) {
           text: summaryText,
         });
 
-        appendHistory(threadId, "assistant", summaryText);
+        await appendHistory(threadId, "assistant", summaryText);
 
       } catch (err) {
         console.error("❌ File ingestion error:", err.message);

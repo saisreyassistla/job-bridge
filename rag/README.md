@@ -5,8 +5,8 @@ A production-grade Retrieval-Augmented Generation pipeline implementing all
 embeddings), reciprocal rank fusion, cross-encoder reranking, and grounded
 LLM generation with citations.
 
-Built with **LangGraph** for agent orchestration, **Google Gemini** for
-embeddings and generation, and **Qdrant** as the vector store.
+Built with **LangGraph** for agent orchestration, local MiniLM embeddings,
+Claude generation, and **Qdrant** as the vector store.
 
 ## Pipeline
 
@@ -30,7 +30,7 @@ User question
   8. Reranking               → top 5 chunks
      (cross-encoder / Cohere rerank)
   9. Context optimization + prompt construction
-  10. LLM (Gemini)           → answer + citations
+  10. LLM (Claude)           → answer + citations
 ```
 
 ## Tech stack
@@ -38,8 +38,8 @@ User question
 | Layer            | Tools |
 |------------------|-------|
 | Orchestration    | LangGraph |
-| Embeddings       | Gemini `text-embedding-004` |
-| LLM              | Gemini 1.5 Pro |
+| Embeddings       | `all-MiniLM-L6-v2` |
+| LLM              | Claude Haiku |
 | Vector store     | Qdrant |
 | Lexical search   | rank_bm25 (BM25Okapi) |
 | Reranking        | cross-encoder/ms-marco-MiniLM-L-6-v2 (local) or Cohere |
@@ -67,7 +67,7 @@ hybrid-rag/
 ├── generation/
 │   ├── context.py         # Context optimization
 │   ├── prompt.py          # Prompt construction
-│   └── llm.py             # Gemini generation + citations
+│   └── llm.py             # Claude generation + citations
 ├── graph/
 │   ├── state.py           # LangGraph RAGState definition
 │   ├── nodes.py           # One function per pipeline node
@@ -77,7 +77,7 @@ hybrid-rag/
 ├── tests/
 │   ├── test_chunker.py
 │   ├── test_rrf.py
-│   └── test_pipeline.py
+│   └── test_metrics.py
 ├── scripts/
 │   └── ingest_docs.py     # CLI: python scripts/ingest_docs.py <path>
 ├── .env.example
@@ -92,7 +92,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# fill in GOOGLE_API_KEY, QDRANT_URL, QDRANT_API_KEY, COHERE_API_KEY
+# fill in ANTHROPIC_API_KEY, QDRANT_URL, QDRANT_API_KEY, COHERE_API_KEY
 ```
 
 Start Qdrant locally (Docker):
@@ -110,6 +110,11 @@ python scripts/ingest_docs.py ./data/raw
 **Start the API server:**
 ```bash
 uvicorn api.server:app --reload
+```
+
+For staging verification from the repository root:
+```bash
+npm run rag:verify-staging
 ```
 
 **Query directly:**

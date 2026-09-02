@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-30T17:39:48.916740",
+  "timestamp": "2026-08-09T18:00:18.227562",
   "directory": "data/raw",
   "config": {
     "chunk_size": 512,
@@ -7,35 +7,35 @@
     "overlap_ratio": 0.125
   },
   "pipeline": {
-    "raw_docs": 30,
-    "after_cleaning": 30,
+    "raw_docs": 32,
+    "after_cleaning": 32,
     "noise_filtered": 0,
     "noise_filter_rate": 0.0,
-    "total_chunks": 229
+    "total_chunks": 232
   },
   "chunk_size_distribution": {
-    "mean_chars": 512.0,
-    "median_chars": 538,
+    "mean_chars": 510.2,
+    "median_chars": 537.5,
     "min_chars": 82,
     "max_chars": 577,
-    "stdev_chars": 83.3,
-    "mean_words": 83.9
+    "stdev_chars": 84.9,
+    "mean_words": 83.4
   },
   "chunks_per_document": {
-    "mean": 229,
-    "median": 229,
-    "min": 229,
+    "mean": 77.3,
+    "median": 2,
+    "min": 1,
     "max": 229,
-    "total_sources": 1
+    "total_sources": 3
   },
   "latency_ms": {
-    "stage_1_load": 4034.49,
-    "stage_2_clean": 10.87,
-    "stage_3_chunk": 1.12,
-    "stage_4_enrich": 4.56,
-    "total_ingestion": 4051.05
+    "stage_1_load": 7625.06,
+    "stage_2_clean": 25.12,
+    "stage_3_chunk": 3.45,
+    "stage_4_enrich": 13.26,
+    "total_ingestion": 7666.88
   },
   "throughput": {
-    "chunks_per_second": 56.5
+    "chunks_per_second": 30.3
   }
 }

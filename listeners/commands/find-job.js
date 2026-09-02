@@ -25,11 +25,11 @@ export default function registerFindJobCommand(app) {
 
     const threadId = `slash-${command.user_id}-${command.channel_id}`;
 
-    appendHistory(threadId, "user", query);
+    await appendHistory(threadId, "user", query);
 
     const { text, blocks } = await handleMessage(threadId, query);
 
-    appendHistory(threadId, "assistant", text);
+    await appendHistory(threadId, "assistant", text);
 
     await respond({
       text,

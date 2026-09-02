@@ -37,6 +37,19 @@ def test_rrf_deduplication():
     assert len(results) == 1
 
 
+def test_rrf_keeps_same_index_on_different_pages():
+    page_one = make_chunk("doc1.pdf", 0, "Page one")
+    page_one.page = 1
+    page_two = make_chunk("doc1.pdf", 0, "Page two")
+    page_two.page = 2
+
+    results = reciprocal_rank_fusion(
+        [(page_one, 1.0)], [(page_two, 0.9)], top_k=5
+    )
+
+    assert len(results) == 2
+
+
 def test_rrf_top_k():
     chunks = [make_chunk("doc1", i, f"chunk {i}") for i in range(10)]
     bm25 = [(c, 1.0 - i * 0.05) for i, c in enumerate(chunks[:6])]
@@ -46,8 +59,26 @@ def test_rrf_top_k():
     assert len(results) == 3
 
 
+def test_bm25_add_is_idempotent():
+    try:
+        from indexing.bm25_index import BM25Index
+    except ModuleNotFoundError as error:
+        if error.name != "rank_bm25":
+            raise
+        print("Skipped BM25 idempotency check: rank_bm25 is not installed.")
+        return
+
+    chunk = make_chunk("doc1", 0, "A repeated chunk")
+    index = BM25Index.from_chunks([chunk])
+
+    index.add([chunk, chunk])
+
+    assert len(index.chunks) == 1
+
+
 if __name__ == "__main__":
     test_rrf_basic_merge()
     test_rrf_deduplication()
+    test_bm25_add_is_idempotent()
     test_rrf_top_k()
     print("All RRF tests passed.")

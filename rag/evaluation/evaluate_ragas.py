@@ -28,12 +28,14 @@ from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=True)
 
 import anthropic
 
 _client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 RAG_URL = os.getenv("RAG_SERVER_URL", "http://localhost:8000")
+SERVICE_API_KEY = os.getenv("SERVICE_API_KEY", "")
+RAG_HEADERS = {"x-service-key": SERVICE_API_KEY}
 
 # ── Evaluation dataset ────────────────────────────────────────────────────────
 # Grounded in the Amazon Interview Questions Bank PDF you ingested.
@@ -90,6 +92,7 @@ def run_pipeline_on_dataset(dataset: list[dict]) -> list[dict]:
             # Use /report endpoint to get full chunk context
             r = requests.post(
                 f"{RAG_URL}/report",
+                headers=RAG_HEADERS,
                 json={"question": question},
                 timeout=90,
             )
@@ -105,6 +108,7 @@ def run_pipeline_on_dataset(dataset: list[dict]) -> list[dict]:
                 # Fallback to /query endpoint
                 r2 = requests.post(
                     f"{RAG_URL}/query",
+                    headers=RAG_HEADERS,
                     json={"question": question},
                     timeout=60,
                 )

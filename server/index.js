@@ -7,25 +7,50 @@ app.use(express.json());
 
 const PORT = process.env.API_SERVER_PORT || 3001;
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
+const SERVICE_API_KEY = process.env.SERVICE_API_KEY;
+const UPSTREAM_TIMEOUT_MS = Number(process.env.UPSTREAM_TIMEOUT_MS || 30000);
+const APIFY_POLL_TIMEOUT_MS = Number(process.env.APIFY_POLL_TIMEOUT_MS || 120000);
+const JOB_QUERY_TTL_MS = Number(process.env.JOB_QUERY_TTL_MS || 15 * 60 * 1000);
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // jobId → original query, so GET /results/:jobId doesn't need the query in the URL
 const jobQueries = new Map();
+
+function requireServiceKey(req, res, next) {
+  if (!SERVICE_API_KEY) {
+    return res.status(503).json({ error: "Service authentication is not configured" });
+  }
+  if (req.get("x-service-key") !== SERVICE_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+}
+
+function fetchWithTimeout(url, options = {}, timeoutMs = UPSTREAM_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timeout));
+}
 
 /**
  * POST /api/jobs/search
  * body: { search: string, location: string }
  * Starts the Indeed scraper actor on Apify and returns a jobId for polling.
  */
-app.post("/api/jobs/search", async (req, res) => {
-  const { search, location } = req.body;
+app.post("/api/jobs/search", requireServiceKey, async (req, res) => {
+  const search = typeof req.body.search === "string" ? req.body.search.trim() : "";
+  const location = typeof req.body.location === "string" ? req.body.location.trim() : "";
 
-  if (!search) {
+  if (!search || search.length > 200) {
     return res.status(400).json({ error: "search is required" });
+  }
+  if (!APIFY_TOKEN) {
+    return res.status(503).json({ error: "Job search is not configured" });
   }
 
   try {
-    const r = await fetch(
+    const r = await fetchWithTimeout(
       `https://api.apify.com/v2/acts/misceres~indeed-scraper/runs?token=${APIFY_TOKEN}`,
       {
         method: "POST",
@@ -62,15 +87,20 @@ app.post("/api/jobs/search", async (req, res) => {
  * Long-polls the Apify run until it reaches a terminal state,
  * then fetches results and synthesizes them with Claude.
  */
-app.get("/api/jobs/results/:jobId", async (req, res) => {
+app.get("/api/jobs/results/:jobId", requireServiceKey, async (req, res) => {
   const { jobId } = req.params;
   const query = jobQueries.get(jobId) || "";
+  const deadline = Date.now() + APIFY_POLL_TIMEOUT_MS;
 
   try {
     // Long-poll Apify until the run reaches a terminal state
     let datasetId = "";
     while (true) {
-      const r = await fetch(
+      if (Date.now() >= deadline) {
+        jobQueries.delete(jobId);
+        return res.status(504).json({ error: "Job search timed out" });
+      }
+      const r = await fetchWithTimeout(
         `https://api.apify.com/v2/actor-runs/${jobId}?token=${APIFY_TOKEN}`
       );
       const run = await r.json();
@@ -81,6 +111,7 @@ app.get("/api/jobs/results/:jobId", async (req, res) => {
         break;
       }
       if (["FAILED", "ABORTED", "TIMED-OUT"].includes(status)) {
+        jobQueries.delete(jobId);
         return res.status(500).json({ error: `Apify run ${status}` });
       }
 
@@ -88,13 +119,14 @@ app.get("/api/jobs/results/:jobId", async (req, res) => {
     }
 
     // Fetch raw scraped items
-    const itemsRes = await fetch(
+    const itemsRes = await fetchWithTimeout(
       `https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_TOKEN}&limit=50&clean=true`
     );
     const items = await itemsRes.json();
 
     // Synthesize with Claude
     const result = await synthesizeJobs(query, items);
+    jobQueries.delete(jobId);
     res.json({ ...result, query });
   } catch (err) {
     console.error(`Failed to fetch results for run ${jobId}:`, err);
@@ -209,14 +241,14 @@ const RAG_SERVER_URL = process.env.RAG_SERVER_URL || "http://localhost:8000";
  * body: { question: string }
  * Proxies to the Python RAG server and returns answer + citations.
  */
-app.post("/api/rag/query", async (req, res) => {
-  const { question } = req.body;
-  if (!question) {
+app.post("/api/rag/query", requireServiceKey, async (req, res) => {
+  const question = typeof req.body.question === "string" ? req.body.question.trim() : "";
+  if (!question || question.length > 2000) {
     return res.status(400).json({ error: "question is required" });
   }
 
   try {
-    const r = await fetch(`${RAG_SERVER_URL}/query`, {
+    const r = await fetchWithTimeout(`${RAG_SERVER_URL}/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question }),
@@ -238,15 +270,28 @@ app.post("/api/rag/query", async (req, res) => {
 
 /**
  * POST /api/rag/ingest
- * Proxies a file upload to the Python RAG ingest endpoint.
+ * Streams a multipart file upload to the Python RAG ingest endpoint.
  */
-app.post("/api/rag/ingest", async (req, res) => {
+app.post("/api/rag/ingest", requireServiceKey, async (req, res) => {
+  const contentType = req.headers["content-type"];
+  if (!contentType?.startsWith("multipart/form-data")) {
+    return res.status(400).json({ error: "multipart file upload is required" });
+  }
+
   try {
-    const r = await fetch(`${RAG_SERVER_URL}/health`);
-    if (!r.ok) throw new Error("RAG server not reachable");
-    res.json({ message: "RAG server is up. Use POST /api/rag/query to query." });
+    const r = await fetchWithTimeout(`${RAG_SERVER_URL}/ingest`, {
+      method: "POST",
+      headers: { "content-type": contentType },
+      body: req,
+      duplex: "half",
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      return res.status(502).json({ error: data.detail || "RAG ingestion failed" });
+    }
+    res.json(data);
   } catch (err) {
-    res.status(502).json({ error: "RAG server not reachable. Is `npm run rag` running?" });
+    res.status(502).json({ error: "Could not reach RAG server. Is `npm run rag` running?" });
   }
 });
 
@@ -255,9 +300,9 @@ app.post("/api/rag/ingest", async (req, res) => {
  */
 app.get("/api/rag/health", async (req, res) => {
   try {
-    const r = await fetch(`${RAG_SERVER_URL}/health`);
+    const r = await fetchWithTimeout(`${RAG_SERVER_URL}/health`);
     const data = await r.json();
-    res.json({ rag: "ok", ...data });
+    res.status(data.ready ? 200 : 503).json({ rag: data.ready ? "ok" : "starting", ...data });
   } catch (err) {
     res.status(502).json({ error: "RAG server not reachable" });
   }
@@ -266,11 +311,11 @@ app.get("/api/rag/health", async (req, res) => {
 /**
  * POST /api/rag/report
  */
-app.post("/api/rag/report", async (req, res) => {
-  const { question } = req.body;
-  if (!question) return res.status(400).json({ error: "question is required" });
+app.post("/api/rag/report", requireServiceKey, async (req, res) => {
+  const question = typeof req.body.question === "string" ? req.body.question.trim() : "";
+  if (!question || question.length > 2000) return res.status(400).json({ error: "question is required" });
   try {
-    const r = await fetch(`${RAG_SERVER_URL}/report`, {
+    const r = await fetchWithTimeout(`${RAG_SERVER_URL}/report`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question }),

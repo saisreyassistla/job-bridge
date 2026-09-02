@@ -23,11 +23,11 @@ export default function registerAppMentionListener(app) {
       return;
     }
 
-    appendHistory(threadId, "user", userText);
+    await appendHistory(threadId, "user", userText);
 
     const { text, blocks } = await handleMessage(threadId, userText);
 
-    appendHistory(threadId, "assistant", text);
+    await appendHistory(threadId, "assistant", text);
 
     await say({
       text,

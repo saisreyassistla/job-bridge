@@ -3,6 +3,7 @@
 from __future__ import annotations
 import os
 import re
+import hashlib
 from dataclasses import dataclass, field
 from .loader import RawDocument
 
@@ -17,6 +18,11 @@ class Chunk:
     page: int = 0
     chunk_index: int = 0
     metadata: dict = field(default_factory=dict)
+
+
+def chunk_id(chunk: Chunk) -> str:
+    identity = f"{chunk.source}\0{chunk.page}\0{chunk.chunk_index}\0{chunk.text}"
+    return hashlib.sha256(identity.encode("utf-8")).hexdigest()
 
 
 def _recursive_split(text: str, chunk_size: int, overlap: int) -> list[str]:

@@ -2,6 +2,7 @@
 
 import sys
 import os
+import inspect
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,15 +18,30 @@ from indexing.bm25_index import BM25Index
 from indexing.vector_index import VectorIndex
 
 
+def upsert_vectors(vector: VectorIndex, chunks) -> None:
+    """Support the current vector index API and older local checkouts."""
+    if "replace_sources" in inspect.signature(vector.upsert).parameters:
+        vector.upsert(chunks, replace_sources=True)
+    else:
+        print("Warning: vector index does not support source replacement; using idempotent upsert.")
+        vector.upsert(chunks)
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python scripts/ingest_docs.py <directory>")
         sys.exit(1)
 
-    directory = sys.argv[1]
+    directory = os.path.abspath(sys.argv[1])
+    if not os.path.isdir(directory):
+        print(f"Error: document directory does not exist: {directory}", file=sys.stderr)
+        sys.exit(1)
     print(f"Loading documents from {directory}...")
 
     raw_docs = list(load_directory(directory))
+    if not raw_docs:
+        print(f"Error: no supported documents found in {directory}", file=sys.stderr)
+        sys.exit(1)
     print(f"  Loaded {len(raw_docs)} raw document pages/sections")
 
     cleaned = clean_documents(raw_docs)
@@ -44,7 +60,7 @@ def main():
 
     print("Upserting to Qdrant vector store...")
     vector = VectorIndex()
-    vector.upsert(enriched)
+    upsert_vectors(vector, enriched)
     print(f"  Done. {len(enriched)} chunks indexed in Qdrant.")
 
 

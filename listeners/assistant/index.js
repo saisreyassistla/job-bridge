@@ -38,13 +38,13 @@ export default function registerAssistantListeners(app) {
       status: "is searching..."
     });
 
-    appendHistory(threadId, "user", userText);
+    await appendHistory(threadId, "user", userText);
 
     try {
       const userId = message.user;
-      const { text, blocks } = await handleMessage(contextKey, userText, userId);
+      const { text, blocks } = await handleMessage(contextKey, userText, userId, message.channel);
 
-      appendHistory(threadId, "assistant", text);
+      await appendHistory(threadId, "assistant", text);
 
       await say({
         text,
