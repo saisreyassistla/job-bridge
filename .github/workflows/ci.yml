@@ -1,0 +1,110 @@
+name: JobBridge CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ─────────────────────────────────────────
+  # Job 1 — Test Node.js layer
+  # ─────────────────────────────────────────
+  test-node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd /home/runner/work/job-bridge/job-bridge
+          npm install -g pnpm
+          pnpm install
+
+      - name: Check syntax
+        run: node --check app.js
+
+  # ─────────────────────────────────────────
+  # Job 2 — Test Python RAG layer
+  # ─────────────────────────────────────────
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          cd rag
+          pip install -r requirements.txt
+
+      - name: Run RAG tests
+        run: |
+          cd rag
+          python -m pytest tests/ -v
+        continue-on-error: true
+
+      - name: Check chunker
+        run: |
+          cd rag
+          python evaluation/chunking_metrics.py data/raw
+        continue-on-error: true
+
+  # ─────────────────────────────────────────
+  # Job 3 — Build Docker images
+  # ─────────────────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    needs: [test-node, test-python]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Node image
+        run: |
+          docker build -f Dockerfile.node \
+            -t jobbridge-bot:${{ github.sha }} .
+
+      - name: Build RAG image
+        run: |
+          docker build -f rag/Dockerfile.rag \
+            -t jobbridge-rag:${{ github.sha }} ./rag
+
+
+  # ─────────────────────────────────────────
+  # Job 4 — Run evaluation (optional)
+  # ─────────────────────────────────────────
+  evaluate:
+    runs-on: ubuntu-latest
+    needs: [test-python]
+    if: github.ref == 'refs/heads/main'
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          cd rag
+          pip install -r requirements.txt
+
+      - name: Run chunking metrics
+        run: |
+          cd rag
+          python evaluation/chunking_metrics.py data/raw
+        continue-on-error: true
