@@ -68,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test-node, test-python]
     if: github.ref == 'refs/heads/main'
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
